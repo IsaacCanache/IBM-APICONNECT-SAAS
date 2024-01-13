@@ -1,0 +1,35 @@
+CREACION DE PATH/DEFINICION API : 
+
+//La creacion de path en una api, es un proceso en el cual se le asigna una subdirecion a la api principal para que particione de forma
+logica las operaciones que tengan distintos objetivos segun el funcionamiento del api
+
+1.- Creación de un path: (PATH)
+	- Cree una api > Diseño > (PATH +)
+	- Cree un path "/namepath"
+	- Guarde
+
+2.- Añadir una operación (OPERATIONS)
+	- En la api > Diseño > Path > (/namepath) > Operaciones
+	- Seleccion las operaciones (get/post/put/delete)
+
+3.- Añadir parametros (PARAMETERS)
+	- Seleccionar los parametros que seran enviados en el request (parametro requerido/no requerido)
+	- Seleccione el tipo de dato correspondiente
+
+4.- Añadir esquema de respuesta (RESPONSES)
+//Un esquema es una estructura de datos que se envian en la respuesta, basicamente en el flujo de respuesta se engloba el tipo de dato
+del esquema, y todos los valores que vayan en la respuesta se trataran como el tipo de dato del esquema dentro del flujo, pero en
+cuestiones de la respuesta seguira conservando su tipo de dato
+	
+	- Dentro del (path > nombre_path) > responses, estan los codigos que envia (200 default / success)
+	- Busque adentro la seccion squema, y seleccione el tipo de dato del esquema, en este caso usamos OBJECT
+
+5.- Añadir el formato recibido de la solicitud (PRODUCES)
+//Esto especifica en que formato recibe la información, a JSON O XML 
+	- Dentro de path, en operaciones, (PRODUCES)
+	- Seleccionar valor (xml or json), en este caso usamos JSON
+
+
+
+PREGUNTAS:
+2.- Como se configuran los parametros y cual es su diferencia entre enviar un POST y predefinir un parametro en el path?

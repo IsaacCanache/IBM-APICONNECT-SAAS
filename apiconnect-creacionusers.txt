@@ -1,0 +1,15 @@
+Adminitracion de usuarios: Creacion de usuarios
+
+
+1.- Creacion
+
+Miembros > Invitar miembro > Seleccionar rol > Poner mail
+
+2.- Registro del miembro
+
+Una vez se haya mandado el correo el miebro puede crear una cuenta y registrarse
+
+3.- Asignar roles
+
+Normalmente ya existen roles predefinidos segun la funcion asiganada al miembro, los roles se encuentran en SETTINGS
+Se pueden configurar los roles para una funcion y automaticamente los miembros con esa funcion heredan los roles 

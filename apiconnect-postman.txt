@@ -1,0 +1,13 @@
+Probar con postman:
+
+1.- New
+2.- HTTP
+3.- Header: KEY/Content-Type , VALUE/application/json
+4.- BODY/RAW: JSON
+{
+    "card":"987654321987654321",
+    "name":"ibm"
+}
+
+5.- URL/VERBO: URL.COM
+6.- SEND

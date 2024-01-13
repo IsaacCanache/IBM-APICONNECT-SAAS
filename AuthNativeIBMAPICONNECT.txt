@@ -1,0 +1,66 @@
+Auth Native: 
+
+curl -X POST \
+  https://api.us-east-a.apiconnect.ibmappdomain.cloud/testing-instance/sandbox/authnative/oauth2/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials&client_id=b9a4e0c61af188bf062205a79e6b3a39&client_secret=6c39ef96e082ddb51300e162e93ea2c4&scope=sample_scope_1'
+
+
+
+curl -X GET \
+  https://api.us-east-a.apiconnect.ibmappdomain.cloud/testing-instance/sandbox/getyoutube \
+  -H 'Authorization: Bearer AAIgYjlhNGUwYzYxYWYxODhiZjA2MjIwNWE3OWU2YjNhMzke-FyIEfObz5OIwGGgS_oKf9TqR7Uc_jWBVYyOZ72-6dCDkoJDsEP4JR2Knrk_ByGO9d1CVQAfO5o_XGBJp_cdNY0fGe4ycBvLTtG2DnAsDY8OhdEQR09qRfrL2v5Kq07Mzq1DHmuyiQjvgN6qimg8'
+
+----------------------------------------------------
+
+----------------------------------------------------
+
+Acceder al recurso: 
+
+curl -X POST \
+  https://api.us-east-a.apiconnect.ibmappdomain.cloud/isaac-instance-dv/sandbox/getoperations/transfortInformation \
+ -H 'Content-Type: application/json' \
+ -H 'Authorization: Bearer AAIgODFlN2IxMzU5N2ZhZDYxZjFmZDM2NDMxMDdkYTczMjUCz7kejL3ka7bCLQ0yM3azisEKjP9j8i9zSvxS8Ji7cBa7Mil67R95caJpZ6yTeBj5sqZdSckORIODy8JXZ1asH5m7H8VregMsKzNCqMkwGkXLXKJAV8m7-UUofocagxE' \
+ -d '{
+   "campo1": "valor1",
+   "campo2": "valor2"
+}'
+
+
+Solicitar token de acceso:
+
+curl -X POST \
+  https://api.us-east-a.apiconnect.ibmappdomain.cloud/isaac-instance-dv/sandbox/oauth-native/oauth2/token \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials&client_id=81e7b13597fad61f1fd3643107da7325&client_secret=c1148bd32c788ca9dd01ba85dc681b12&scope=operaciones'
+
+Postman:
+
+Solicitar acceso :
+
+Introduce la URL de la solicitud: En la barra de direcciones, introduce la URL https://api.us-east-a.apiconnect.ibmappdomain.cloud/isaac-instance-dv/sandbox/getoperations/transfortInformation.
+Establece los encabezados de la solicitud: Haz clic en la pestaña "Headers" y luego en "Add". Introduce Content-Type como clave y application/json como valor. Luego, añade otro encabezado con Authorization como clave y Bearer AAIgODFlN2IxMzU5N2ZhZDYxZjFmZDM2NDMxMDdkYTczMjUCz7kejL3ka7bCLQ0yM3azisEKjP9j8i9zSvxS8Ji7cBa7Mil67R95caJpZ6yTeBj5sqZdSckORIODy8JXZ1asH5m7H8VregMsKzNCqMkwGkXLXKJAV8m7-UUofocagxE como valor.
+Configura el cuerpo de la solicitud: Haz clic en la pestaña "Body" y selecciona "raw". Luego, selecciona "JSON (application/json)" en el menú desplegable. Introduce los datos JSON que deseas enviar en el cuadro de texto:
+   {
+       "campo1": "valor1",
+       "campo2": "valor2"
+   }
+Envía la solicitud: Haz clic en el botón "Send" para enviar la solicitud.
+
+
+Acceder al recurs: 
+
+Para configurar esto en Postman:
+
+Configura la solicitud: Asegúrate de que la solicitud sea de tipo POST y establece la URL a https://api.us-east-a.apiconnect.ibmappdomain.cloud/isaac-instance-dv/sandbox/oauth-native/oauth2/token.
+Establece los encabezados: Agrega un encabezado Content-Type con el valor application/x-www-form-urlencoded.
+Configura el cuerpo de la solicitud: En la sección "Body", selecciona "x-www-form-urlencoded". Luego, agrega los siguientes campos:
+grant_type: Con valor client_credentials
+client_id: Con el valor de tu client_id
+client_secret: Con el valor de tu client_secret
+scope: Con el valor de tu scope
+Envía la solicitud: Haz clic en "Send" para enviar la solicitud.
+
+
+id-name : 81e7b13597fad61f1fd3643107da7325
+secret-name: c1148bd32c788ca9dd01ba85dc681b12	

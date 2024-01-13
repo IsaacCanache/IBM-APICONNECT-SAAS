@@ -1,0 +1,49 @@
+MONETIZAR APIS EN EL DEVELOPER PORTAL:
+
+Al momento de que un consumidor en el developer portal necesita afialiarse a un plan, este debe cancelar el pago para posteriormente 
+proceder con el consumo de la api, esto involucra configuraciones de habilitacion tanto en la consola de IBM API CONNECT SAAS y 
+en el DEVELOPER PORTAL, como las siguientes:
+
+1.- Cree un recurso de facturación
+
+	- Dirijase a (recursos) > (Facturacion)
+	- Adjunte un titulo, y las key publica y privada del proveedor de pagos stripe
+
+Nota> 
+Abra una cuenta previamente en el proveedor de pagos Stripper, en el path de stripe https://dashboard.stripe.com/apikeys
+copie las claves y peguelas en la seccion correspondiente de FACTURACION, EJEMPLO DE CLAVES:
+	
+Key publica:
+pk_test_51OMgHOJ6dsNL6BqIa2HtW2VFZRR4jNeVdPM0Yr9raS38GLKId6FgfVI3CF9rKqLvQtWpaK8c1Q8akwYwmFoGgTKF00t3ufAhxv
+
+Key privada:
+sk_test_51OMgHOJ6dsNL6BqISz4tWtszaFQmA94qH9zTrgboBvLjUNYxKPNwM1N2v6o61Fn5rIM1pFP4uw4N3suKbBvftVrB00ABaDpOH6
+
+2.- Adjunte su facturacion al catalogo correspondiente:
+
+	- Vaya al catalogo, en (valores de catalogo), en (propiedades del catalogo), active (modo produccion)
+	- Luego seleccione (Facturacion) y en (Editar) adjunte la nueva facturacion
+	
+3.- Configure el developer portal
+	
+	- Acceda al developer portal en modo admin ya que este habilita funciones de cnofiguración sobre el DVP
+	- Seleccione en extends, luego en el filtro de busqueda introduzca: APIC Monetization Stripe Integration
+	- Seleccione la casilla correspondiente y guarde los cambios (Se empieza como a descargar algo, espere)
+	- Vaya a (Configuracion) > System > IBM API Developer Portal Billing y en la casilla desplegable cambie active
+	(ibm_stripe_payment_method), guarde los cambios
+	- Luego haga vaya a Configuración > System > IBM APIC Stripe Integration y introduzca las claves anteriores
+	correspondientes al stripe, guarde el cambio
+	
+4.- Cree un producto
+
+	- Cree un producto en la consola de IBM API CONNECT SAAS, haga todo el procedimiento habitual para crearlo
+
+5.- Añade un plan 
+	- En developer > Producto > Producto creado > plans
+	- Seleccione su metodo de pago en Billings, el cual fue creado anteriomente como stripper
+	- Configure en plan de consumo y los costos como lo necesite
+	- Guarde los cambios
+
+6.- Publicar producto
+	- Productos > (:) > Publicar > Catalogo/Space
+	- Validar producto creado en el developer portal con su respectivo plan

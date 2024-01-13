@@ -1,0 +1,156 @@
+Ejemplo Practica: Swith Operation/ Path / Invoke / Message Template / JSON TO XML / PARSE
+
+
+1.- Crear una api:
+    
+    - Crear tipo de con la siguiente identificacion: New OpenAPI Compose a new REST proxy by defining paths and operations
+
+2.- Crear rutas:
+    
+    - Crear dos rutas (/getinformation y /transfortInformation)
+    - Asignar verbos
+    - Asignar parametros de tipo Header String (required)
+    - Definir procedure (application/json)
+    - Definir schema (http/https)
+
+3.- Añadir politicas 
+
+(GET/getinformation) 
+    - Politica Swith: Definir dos casos distintos en base a el path y verbos
+    - Politica Invoke: Utilice la variable de esta politica al final del formulario que esta contiene la informacion del request
+    - Politica Message Template: Haga referencias con la variable de invoke a la informacion que va a presentar
+
+(POST/transfortInformation)
+    - Politica Swith: Definir dos casos distintos en base a el path y verbos
+    - Politica invoke: Deje la politica en las configuraciones predeterminadas
+    - Politica Parse: Configuracion predeterminada
+    - Politica JSON TO XML: Configuracion predeterminada
+
+4.- Prueba de la api
+
+    - Pruebe en la sección test
+    - Pruebe mediante un curl:
+    curl --header "Content-Type: application/json"  --request POST  --data '{"card":"xyz","name":"xyz"}' https://api.us-east-a.apiconnect.ibmappdomain.cloud/isaac-instance-dv/sandbox/getoperations/transfortInformation
+
+
+MATERIAL: 
+
+Plantilla de MENSAJE:
+
+{
+"messageBody":"{{?varContentResponse.body}}"
+"Content-Type":"{{?varContentResponse.headers.Content-Type}}"
+"Cache-Control":"{{?varContentResponse.headers.Cache-Control}}"
+"datevalue":"{{?varContentResponse.headers.Date}}"
+"nombre-id":"{{?request.headers['nombre-id']}}"
+}
+
+///////////////////////////////////
+
+POLITICAS:
+
+   execute:
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: /getInformation
+                - verb: post
+                  path: /getInformation
+              execute:
+                - invoke:
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values: []
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    http-version: HTTP/1.1
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    cache-response: protocol
+                    cache-ttl: 900
+                    stop-on-error: []
+                    graphql-send-type: detect
+                    websocket-upgrade: false
+                    title: invoke
+                    version: 2.0.0
+                    target-url: $(target-url)
+                    follow-redirects: false
+                    inject-proxy-headers: true
+                    output: varContentResponse
+                - message-template:
+                    version: 2.0.0
+                    title: message-template
+                    content-type: application/json
+                    template: >-
+                      { "messageBody":"{{?varContentResponse.body}}"
+                      "Content-Type":"{{?varContentResponse.headers.Content-Type}}"
+                      "Cache-Control":"{{?varContentResponse.headers.Cache-Control}}"
+                      "datevalue":"{{?varContentResponse.headers.Date}}"
+                      "nombre-id":"{{?request.headers['nombre-id']}}" }
+            - operations:
+                - verb: post
+                  path: /transfortInformation
+              execute:
+                - invoke:
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values: []
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    http-version: HTTP/1.1
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    cache-response: protocol
+                    cache-ttl: 900
+                    stop-on-error: []
+                    graphql-send-type: detect
+                    websocket-upgrade: false
+                    title: invoke
+                    version: 2.0.0
+                    target-url: $(target-url)
+                    follow-redirects: false
+                    inject-proxy-headers: true
+                    output: ''
+                    description: ''
+                - parse:
+                    version: 2.2.0
+                    title: parse
+                    parse-settings-reference:
+                      default: apic-default-parsesettings
+                - json-to-xml:
+                    version: 2.0.0
+                    title: json-to-xml
+                    root-element-name: json
+                    always-output-root-element: false
+                    unnamed-element-name: element
+                    input: ''
+                    output: ''
+                    conversion-type: badgerFish
+                    description: ''
+          otherwise: []
+          
+          
+
+La politica se encuentra en documentos:
+gatewayscript.yaml
+
+
+
+
+
+
+
+
+
+

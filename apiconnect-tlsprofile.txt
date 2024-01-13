@@ -1,0 +1,8 @@
+Configuración TLS APIC:
+
+1.- Crear recurso
+	- ir a (recursos) > crear TLS > (Tener como referencia la configuracion del sandbox)
+
+2.- Añadir al catalogo
+	- Añadir al catalogo en (valores de configuracion)  >  (TLS PROFILE) 
+	- Agrege el TLS creado en el paso anterior, y listo, las comunicaciones ya estaran aseguradas, cifradas.

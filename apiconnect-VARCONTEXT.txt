@@ -1,0 +1,19 @@
+ACCEDA A DATOS CON VARIABLES DE CONTEXTO:
+
+https://www.ibm.com/docs/en/api-connect/saas?topic=reference-api-connect-context-variables#rapim_context_var__cert-variables
+
+request: Contiene información sobre la solicitud actual, incluyendo el cuerpo de la solicitud, los encabezados, los parámetros de consulta, etc.
+response: Contiene información sobre la respuesta actual, incluyendo el cuerpo de la respuesta, los encabezados, el código de estado, etc.
+context: Contiene información sobre el contexto de la solicitud, incluyendo el ID de la solicitud, la fecha y hora de la solicitud, el nombre del remitente, etc.
+variables: Es un objeto que contiene todas las variables definidas en el ámbito actual.
+apim: Es el módulo principal de IBM API Connect que proporciona funciones para interactuar con el Gateway de API Connect.
+gateway: Proporciona funciones para interactuar con el Gateway de API Connect, como la lectura y escritura de variables de contexto, la invocación de APIs, etc.
+security: Proporciona funciones para interactuar con el servicio de seguridad de IBM API Connect, como la autenticación y la autorización.
+generated.jwt: Contiene el token JWT generado por la política "Generate JWT".
+request.headers.<header-name>: Accede a un encabezado específico de la solicitud. Reemplaza <header-name> con el nombre del encabezado que deseas acceder.
+request.query.<parameter-name>: Accede a un parámetro de consulta específico de la solicitud. Reemplaza <parameter-name> con el nombre del parámetro que deseas acceder.
+request.path.params.<parameter-name>: Accede a un parámetro de ruta específico de la solicitud. Reemplaza <parameter-name> con el nombre del parámetro que deseas acceder.
+request.body: Accede al cuerpo de la solicitud.
+response.statusCode: Accede al código de estado de la respuesta.
+response.body: Accede al cuerpo de la respuesta.
+response.headers.<header-name>: Accede a un encabezado específico de la respuesta. Reemplaza <header-name> con el nombre del encabezado que deseas acceder.

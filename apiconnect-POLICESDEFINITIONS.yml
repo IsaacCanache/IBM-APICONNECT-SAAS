@@ -1,0 +1,518 @@
+POLITICAS APIC:
+
+Politicas logicas:
+
+//Son politicas que definen el flujo logico de una API
+
+1 .- politica de switch:
+
+//Se utiliza para ejercer un condicional donde especifica que operacion realizar en base al path
+
+#Ejemplo/1: condicional por versiones del api
+- switch:
+   version: 2.0.0
+   title: switch
+   case:
+     - condition: 'request.path.startsWith("/api/v1")'
+       execute: 
+         - operation: 'operation1'
+     - condition: 'request.path.startsWith("/api/v2")'
+       execute: 
+         - operation: 'operation2'
+     - default: 
+         execute: 
+           - operation: 'operation3'
+
+#Ejemplo/2: condicional por parametro de la consulta
+- switch:
+   version: 2.0.0
+   title: switch
+   case:
+     - condition: 'request.query.parameter1 == "value1"'
+       execute: 
+         - operation: 'operation1'
+     - condition: 'request.query.parameter1 == "value2"'
+       execute: 
+         - operation: 'operation2'
+     - default: 
+         execute: 
+           - operation: 'operation3'
+           
+#Ejemlo/3: condicional por verbo de la consulta
+- switch:
+   version: 2.0.0
+   title: switch
+   case:
+     - condition: 'request.method == "GET"'
+       execute: 
+         - operation: 'operation1'
+     - condition: 'request.method == "POST"'
+       execute: 
+         - operation: 'operation2'
+     - default: 
+         execute: 
+           - operation: 'operation3'
+
+#Ejemlo/4: condicional por cuerpo de la solicitud
+- switch:
+   version: 2.0.0
+   title: switch
+   case:
+     - condition: 'request.body.type == "type1"'
+       execute: 
+         - operation: 'operation1'
+     - condition: 'request.body.type == "type2"'
+       execute: 
+         - operation: 'operation2'
+     - default: 
+         execute: 
+           - operation: 'operation3'
+
+#Ejemplo/5: condicional basada en el path con operaciones de delete y ocultacion
+# carry out different redaction actions depending on the operation
+- operation-switch:
+  version: 1.0.0
+  title: clear_region_and_set_body
+  case:
+    - operations:
+      - verb: GET
+        path: /account_details
+      execute:
+        - redact:
+            title: remove secret field
+            actions:
+              - action: remove
+                from: all
+                path: /document/user/secret
+    - operations:
+      - verb: GET
+        path: /account_status
+      execute:
+        - redact:
+            title: redact address
+            actions:
+              - action: redact
+                from: response
+                path: //*[@name='secondaryAddress']/*[@name='streetAddress']
+
+2.- Throw:
+//politica que dependiendo de una condicional lanza un error, principalmente se utiliza para denegar o no un paso o informar sobre
+algo en especifico, esto cuenta con, la condicional, un mensaje, y el codigo que envia
+
+#Ejemplo/1: Si al momento de autenticarse, no cuenta con un determinado rol de acceso, entonces, envia el error
+- switch:
+  version: 2.0.0
+  title: switch
+  case:
+    - condition: 'request.security.user.role == "admin"'
+      execute: 
+        - operation: 'operation1'
+    - condition: 'request.security.user.role == "user"'
+      execute: 
+        - throw:
+            title: "Access denied"
+            message: "You do not have permission to perform this operation."
+            code: 403
+    - default: 
+        execute: 
+          - throw:
+              title: "Unauthorized"
+              message: "You are not authorized to access this resource."
+              code: 401
+
+Politicas de tranformación:
+
+1.-Extract:
+
+//Es una politica que extrae valores tanto del request como del response, dependiendo de lo definido, guarda el valor en una variable
+la cual puede ser usada posteriormente
+
+#Ejemplo/1: Extraccion de un ID Cliente del resquest (from) / (path), guardado en una variable (variable), verificacion con condicional
+(condition)
+
+- extract:
+  title: Extract user ID
+  from: request
+  path: /user/idx
+  variable: userId
+- switch:
+  version: 2.0.0
+  title: switch
+  case:
+    - condition: 'userId == "admin"'
+      execute: 
+        - operation: 'operation1'
+    - default: 
+        execute: 
+          - throw:
+              title: "Access denied"
+              message: "You do not have permission to perform this operation."
+              code: 403
+
+2.- JSON to XML
+
+//Convierte de formato JSON a XML, valida el origen de la variable (from) que pudiera ser response o request
+, y convierte el contenido de la variable (variable), el principalmente caso de uso es cuando un servicio solo admite XML
+
+- extract:
+ title: Extract data
+ from: request
+ path: /data
+ variable: myVariable
+- json-to-xml:
+ title: Convert JSON to XML
+ from: variable
+ variable: myVariable
+- switch:
+ version: 2.0.0
+ title: switch
+ case:
+   - condition: 'myVariable.contains("<xml>")'
+     execute: 
+       - operation: 'operation1'
+   - default: 
+       execute: 
+         - throw:
+             title: "Invalid data format"
+             message: "Data must be in XML format."
+             code: 400
+
+3.- Map:
+//Se puede convertir de un formato a otro la peticion del request, al formato se refiere al patro de los campos y su transformacion a 
+el formato definido
+
+#Ejemplo/1: Podemos validar si el contenido del request es de un formato y cambiarlo a otro, como el siguiente Ejemplo/1
+
+- Se envia una solicitud de request en este formato:
+{
+ "customer": {
+   "name": "John Doe",
+   "address": "123 Main St, Anytown, USA"
+ },
+ "items": [
+   {
+     "productId": 1,
+     "quantity": 2
+   },
+   {
+     "productId": 2,
+     "quantity": 1
+   }
+ ]
+}
+- Pero la aplicacion solo debe aceptar este formato:
+{
+ "order": {
+   "customer": {
+     "fullName": "John Doe",
+     "shippingAddress": "123 Main St, Anytown, USA"
+   },
+   "orderItems": [
+     {
+       "product": {
+         "id": 1,
+         "quantity": 2
+       }
+     },
+     {
+       "product": {
+         "id": 2,
+         "quantity": 1
+       }
+     }
+   ]
+ }
+}
+
+- La politica para lograr este formato es el siguiente haciendo uso del map:
+
+- map:
+ title: Map order data
+ from: request
+ to: response
+ map:
+   - from: /customer/name
+     to: /order/customer/fullName
+   - from: /customer/address
+     to: /order/customer/shippingAddress
+   - from: /items
+     to: /order/orderItems
+   - from: /items/productId
+     to: /order/orderItems/product/id
+   - from: /items/quantity
+     to: /order/orderItems/product/quantity
+
+4.- Message template:
+//genera un template a partir de valores de referencia como este 
+#Ejemplo/1
+//Si tenemos este formato JSON
+{
+ "order": {
+  "customer": {
+    "name": "John Doe",
+    "address": "123 Main St, Anytown, USA"
+  },
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    },
+    {
+      "productId": 2,
+      "quantity": 1
+    }
+  ]
+ }
+}
+
+//Podemos convertirlo a XML tomando las etiquetas xml y referenciar los valores
+
+<order>
+ <customer>
+   <name>John Doe</name>
+   <address>123 Main St, Anytown, USA</address>
+ </customer>
+ <items>
+   <item>
+     <productId>1</productId>
+     <quantity>2</quantity>
+   </item>
+   <item>
+     <productId>2</productId>
+     <quantity>1</quantity>
+   </item>
+ </items>
+</order>
+
+//Con esta politica se genera, en el path /order, se almacena en la variable, y la variable se instancia con las propiedades de las
+etiquetas
+
+- extract:
+ title: Extract order data
+ from: request
+ path: /order
+ variable: myVariable
+- message-template:
+ title: Convert order data to XML
+ template: |
+ <order>
+   <customer>
+     <name>{{myVariable.customer.name}}</name>
+     <address>{{myVariable.customer.address}}</address>
+   </customer>
+   <items>
+     {{#each myVariable.items}}
+     <item>
+       <productId>{{this.productId}}</productId>
+       <quantity>{{this.quantity}}</quantity>
+     </item>
+     {{/each}}
+   </items>
+ </order>
+
+5.- Parse:
+
+//Se utiliza para convertir un formato de tezto en un formato JSON o XML esto sirve normalmente si necesita manipular objetos en el 
+flujo de la api por JSON
+
+- parse:
+ title: Parse JSON
+ from: request
+ to: variable
+ variable: myVariable
+- switch:
+ version: 2.0.0
+ title: switch
+ case:
+ - condition: 'myVariable.customer.name == "John Doe"'
+   execute: 
+     - operation: 'operation1'
+ - default: 
+     execute: 
+       - throw:
+           title: "Invalid customer name"
+           message: "Customer name must be John Doe."
+           code: 400
+
+
+
+
+6.- Redaction:
+
+//Es una politica la cual se especifica el campo a ocultar la informacion del requests o el response
+
+#Ejemplo/1
+
+//Si la entrada del resquest es esta, y quiero ocultar informacion card
+{
+    "card":"987654321987654321",
+    "name":"ibm"
+}
+
+
+
+//Esta es la politica provada para ocultar o remover un campo, esta politica hace uso de otra politica que es "parse", la cual 
+incluye solo la configuracion por default, otra cosa, el orden es. INVOKE, PARSE, REDACTION
+
+                - parse:
+                    version: 2.2.0
+                    title: parse
+                    parse-settings-reference:
+                      default: apic-default-parsesettings
+                - redact:
+                    version: 2.0.0
+                    title: redact
+                    redactions:
+                      - action: redact
+                        path: message.body.card
+                    root: ''
+//Y la salida o respuesta con el dato oculto seria este
+
+{
+    "card":"************",
+    "name":"ibm"
+}
+
+
+Politicas de seguridad:
+
+7.- Cliente usuario:
+
+Así accede una app suscrita, con sus credenciales
+//Así se accede
+curl -H "id-name: 10309cf7f54c04fc7ae0277f59e62101" -H "id-secret: 25b5f47bc6354408fcdd897f30f9e612" https://api.us-east-a.apiconnect.ibmappdomain.cloud/testing-instance/prod/getjsonpost/
+
+
+ID KEY:
+10309cf7f54c04fc7ae0277f59e62101
+
+ID SECRECT:
+25b5f47bc6354408fcdd897f30f9e612
+
+Ejemplo:
+
+ - client-security:
+          version: 2.0.0
+          title: client-security
+          stop-on-error: true
+          secret-required: true
+          extract-credential-method: header
+          client-auth-method: native
+          description: cliente-security
+          id-name: id-name
+          secret-name: id-secret
+
+8.- JWT-GENERATE: 
+
+//Asi se aplica la politica JWTGenerate, mediante la consolidación de la informacion principal en una variable, y mostrando 
+el token que genera en la politica Message Template mediante la variable de API CONECT
+    execute:
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: /gen
+              execute:
+                - set-variable:
+                    version: 2.0.0
+                    title: set-variable
+                    actions:
+                      - set: hs256-key
+                        value: >-
+                          { "alg": "HS256", "kty": "oct", "use": "sig", "k":
+                          "o5yErLaE-dbgVpSw65Rq57OA9dHyaF66Q_Et5azPa-XUjbyP0w9iRWhR4kru09aFfQLXeIODIN4uhjElYKXt8n76jt0Pjkd2pqk4t9abRF6tnL19GV4pflfL6uvVKkP4weOh39tqHt4TmkBgF2P-gFhgssZpjwq6l82fz3dUhQ2nkzoLA_CnyDGLZLd7SZ1yv73uzfE2Ot813zmig8KTMEMWVcWSDvy61F06vs_6LURcq_IEEevUiubBxG5S2akNnWigfpbhWYjMI5M22FOCpdcDBt4L7K1-yHt95Siz0QUb0MNlT_X8F76wH7_A37GpKKJGqeaiNWmHkgWdE8QWDQ",
+                          "kid": "hs256-key" }
+                        type: string
+                - jwt-generate:
+                    version: 2.0.0
+                    title: jwt-generate
+                    jwt: generated.jwt
+                    iss-claim: request.headers.iss-claim
+                    exp-claim: 3600
+                    aud-claim: request.headers.aud-claim
+                    jws-jwk: hs256-key
+                    jws-alg: HS256
+                - message-template:
+                    version: 2.0.0
+                    title: message-template
+                    template: '{ "messageBody":"{{?generated.jwt}}" }'
+                    content-type: application/json
+          otherwise: []
+
+
+//La politica se prueba con los siguientes parametros 
+/gen
+iss-claim: https://myidp.ibm.com 
+aud-claim: ClientID1
+
+/validate
+
+Authorization : Bearer eyJraWQiOiJoczI1Ni1rZXkiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL215aWRwLmlibS5jb20iLCJhdWQiOiJDbGllbnRJRDEiLCJleHAiOjE3MDQzMDA0MjYsImlhdCI6MTcwNDI5NjgyNn0.3SitupPL4oxue6E8l6buhmZoAlxwGQjxN5OCWoNVuWg
+
+9.- Politica Validate JWT
+
+//Esta politica se utiliza para validar un conjunto de factores, como la audiencia, el emisor y la firma criptografica
+tambien el estado del tokem (activo o no, expirado/activo)
+
+
+    execute:
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: /gen
+              execute:
+                - set-variable:
+                    version: 2.0.0
+                    title: set-variable
+                    actions:
+                      - set: hs256-key
+                        value: >-
+                          { "alg": "HS256", "kty": "oct", "use": "sig", "k":
+                          "o5yErLaE-dbgVpSw65Rq57OA9dHyaF66Q_Et5azPa-XUjbyP0w9iRWhR4kru09aFfQLXeIODIN4uhjElYKXt8n76jt0Pjkd2pqk4t9abRF6tnL19GV4pflfL6uvVKkP4weOh39tqHt4TmkBgF2P-gFhgssZpjwq6l82fz3dUhQ2nkzoLA_CnyDGLZLd7SZ1yv73uzfE2Ot813zmig8KTMEMWVcWSDvy61F06vs_6LURcq_IEEevUiubBxG5S2akNnWigfpbhWYjMI5M22FOCpdcDBt4L7K1-yHt95Siz0QUb0MNlT_X8F76wH7_A37GpKKJGqeaiNWmHkgWdE8QWDQ",
+                          "kid": "hs256-key" }
+                        type: string
+                - jwt-generate:
+                    version: 2.0.0
+                    title: jwt-generate
+                    jwt: generated.jwt
+                    iss-claim: request.headers.iss-claim
+                    exp-claim: 3600
+                    aud-claim: request.headers.aud-claim
+                    jws-jwk: hs256-key
+                    jws-alg: HS256
+                - message-template:
+                    version: 2.0.0
+                    title: message-template
+                    template: '{ "messageBody":"{{?generated.jwt}}" }'
+                    content-type: application/json
+            - operations:
+                - verb: get
+                  path: /validate
+              execute:
+                - jwt-validate:
+                    version: 2.0.0
+                    title: jwt-validate
+                    jwt: request.headers.authorization
+                    output-claims: decoded.claims
+                    jws-crypto: ''
+                    iss-claim: https://myidp.ibm.com
+                    aud-claim: ClientID1
+                    jws-jwk: $(hs256-key)
+                    jwe-crypto: ''
+                    jwe-jwk: ''
+          otherwise: []
+
+Probar: 
+   
+/validate
+ Header: 
+
+Authorization : Bearer eyJraWQiOiJoczI1Ni1rZXkiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL215aWRwLmlibS5jb20iLCJhdWQiOiJDbGllbnRJRDEiLCJleHAiOjE3MDQzMDA0MjYsImlhdCI6MTcwNDI5NjgyNn0.3SitupPL4oxue6E8l6buhmZoAlxwGQjxN5OCWoNVuWg
+
+
+
