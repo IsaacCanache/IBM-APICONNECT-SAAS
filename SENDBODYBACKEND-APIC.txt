@@ -1,0 +1,105 @@
+Enviar body hacia backend: SPRING BOOT JAVA/ APIC
+
+1.- Crear una api
+
+//Crear una api que envie el body hacia el servicio que invoca de esta forma
+
+- Añade un parametro que indique que enviara el body
+
+  assembly:
+    execute:
+      - invoke:
+          title: invoke
+          version: 2.0.0
+          verb: keep
+          target-url: $(target-url)
+          follow-redirects: false
+          timeout: 60
+          parameter-control:
+            type: allowlist
+            values:
+              - request.body #parametro de body
+          header-control:
+            type: blocklist
+            values: []
+          inject-proxy-headers: true
+          chunked-uploads: true
+          persistent-connection: true
+	   
+	   
+2.- Generar un servicio backend:
+
+//Generar un servicio el cual reciba las solicitudes de un path y las reciba los parametros como body
+
+//UserController clase
+
+@RestController
+public class UserController {
+   private final UserService userService;
+
+   public UserController(UserService userService) {
+       this.userService = userService;
+   }
+
+   @PostMapping(value = "/users", consumes = MediaType.APPLICATION_JSON_VALUE)
+   public ResponseEntity<String> processUser(@RequestBody Map<String, Object> user) {
+       String processedUser = userService.processUser(user);
+       return ResponseEntity.ok(processedUser);
+   }
+}
+
+//UserService clase
+
+@Service
+public class UserService {
+	   private List<User> users = Arrays.asList(
+	       new User(112321, "isaac"),
+	       new User(2234, "user2"),
+	       new User(33452, "user3")
+	   );
+
+	   public String processUser(Map<String, Object> user) {
+		      String username = (String) user.get("username");
+		      String processedUsername = username + "A";
+		      return processedUsername;
+		  }
+		}
+
+//User clase
+public class User {
+   private Integer id;
+   private String username;
+
+   public User(Integer id, String username) {
+       this.id = id;
+       this.username = username;
+   }
+
+   public Integer getId() {
+       return id;
+   }
+
+   public void setId(Integer id) {
+       this.id = id;
+   }
+
+   public String getUsername() {
+       return username;
+   }
+
+   public void setUsername(String username) {
+       this.username = username;
+   }
+}
+
+
+
+//////////////////////////////////
+
+Postman>
+
+Header> Content-Type: application/json > ngrok-skip-browser-warning : true
+Body> raw:
+{
+ "username": "testuser"
+}
