@@ -1,0 +1,45 @@
+steps:
+  - type: request
+    method: get
+    headers: 
+      # X-IBM-Client-Id can be obtained from Sandbox catalog application
+      X-IBM-Client-Id: <placeholder>
+    url: https://api.eu-west-a.apiconnect.ibmappdomain.cloud/demo/sandbox/order/ABC123
+    var: payload
+    mode: json
+  - type: assert-equals 
+    expression: payload_response_statusCode
+    value: 200
+    ifexists: false
+    stoponfail: false
+  - type: assert-equals 
+    expression: payload_response_header_Content-Type
+    value: application/json
+  - type: assert-in 
+    expression: payload_response_header_Content-Type
+    values: 
+      - application/json
+      - application/swagger+yaml
+  - type: assert-contains 
+    expression: payload_response_header_Content-Type
+    value: app
+  - type: assert-matches 
+    expression: payload_response_header_Content-Type
+    value: ^[a-z]+/json
+  - type: assert-exists 
+    expression: "payload"  
+    stoponfail: false
+  - type: assert-is 
+    expression: "payload.tracking_reference"
+    value: "string"
+    ifexists: "false" 
+    stoponfail: false
+  - type: assert-exists 
+    expression: payload.shipped_at
+    stoponfail: false
+  - type: assert-exists 
+    expression: payload.status
+    stoponfail: false
+  - type: assert-exists 
+    expression: payload.created_at  
+    stoponfail: false
